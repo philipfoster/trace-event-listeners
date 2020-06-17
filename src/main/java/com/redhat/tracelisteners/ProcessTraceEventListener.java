@@ -12,7 +12,6 @@ import com.redhat.tracelisteners.messaging.AmqMessagePublisher;
 import com.redhat.tracelisteners.messaging.MessagePublisher;
 import com.redhat.tracelisteners.messaging.PublishingFailedException;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
 import org.kie.api.event.process.ProcessCompletedEvent;
 import org.kie.api.event.process.ProcessEventListener;
@@ -20,18 +19,17 @@ import org.kie.api.event.process.ProcessNodeLeftEvent;
 import org.kie.api.event.process.ProcessNodeTriggeredEvent;
 import org.kie.api.event.process.ProcessStartedEvent;
 import org.kie.api.event.process.ProcessVariableChangedEvent;
-import org.kie.api.event.rule.AgendaEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProcessTraceEventListener implements ProcessEventListener {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ProcessTraceEventListener.class);
-    private MessagePublisher publisher = new AmqMessagePublisher();
+    private MessagePublisher publisher;
     private LocalDateTime nodeStartTime;
 
     public ProcessTraceEventListener() throws Exception {
+        publisher = new AmqMessagePublisher();
     }
-
 
     public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
         LOGGER.trace("BeforeNodeTriggered: " + event.toString());
@@ -61,7 +59,6 @@ public class ProcessTraceEventListener implements ProcessEventListener {
 
         try {
             LOGGER.debug("BeforeProcessStarted sending to queue");
-//            publisher = new MessagePublisher(MessageQueueType.PROCESS);
             publisher.publishMessage(processTraceEvent);
         } catch (PublishingFailedException e) {
             e.printStackTrace();
@@ -159,8 +156,6 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         }
         
         processTraceEvent.setProcess(process);
-
-        //            publisher = new MessagePublisher(MessageQueueType.PROCESS);
         try {
             publisher.publishMessage(processTraceEvent);
         } catch (PublishingFailedException e) {
