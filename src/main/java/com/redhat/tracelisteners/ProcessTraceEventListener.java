@@ -7,34 +7,31 @@ import com.redhat.eventmodel.events.TraceEventType;
 import com.redhat.eventmodel.model.Node;
 import com.redhat.eventmodel.model.NodeState;
 import com.redhat.eventmodel.model.NodeType;
+import com.redhat.eventmodel.model.Process;
 import com.redhat.tracelisteners.messaging.AmqMessagePublisher;
 import com.redhat.tracelisteners.messaging.MessagePublisher;
 import com.redhat.tracelisteners.messaging.PublishingFailedException;
-import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
-import org.kie.api.event.process.*;
-import org.kie.api.event.rule.AgendaEventListener;
-import org.kie.internal.process.CorrelationKey;
-import com.redhat.eventmodel.model.Process;
-
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.concurrent.TimeoutException;
+import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
+import org.kie.api.event.process.ProcessCompletedEvent;
+import org.kie.api.event.process.ProcessEventListener;
+import org.kie.api.event.process.ProcessNodeLeftEvent;
+import org.kie.api.event.process.ProcessNodeTriggeredEvent;
+import org.kie.api.event.process.ProcessStartedEvent;
+import org.kie.api.event.process.ProcessVariableChangedEvent;
+import org.kie.api.event.rule.AgendaEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProcessTraceEventListener implements ProcessEventListener {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ProcessTraceEventListener.class);
     private MessagePublisher publisher = new AmqMessagePublisher();
-    private String correlationKey;
     private LocalDateTime nodeStartTime;
 
     public ProcessTraceEventListener() throws Exception {
     }
 
-    public String getCorrelationKey() {
-        return correlationKey;
-    }
 
     public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
         LOGGER.trace("BeforeNodeTriggered: " + event.toString());
@@ -44,22 +41,15 @@ public class ProcessTraceEventListener implements ProcessEventListener {
     public void beforeProcessStarted(ProcessStartedEvent event) {
         LOGGER.trace("BeforeProcessStarted: " + event.toString());
 
-        //get correlation key name
         RuleFlowProcessInstance rfpi = (RuleFlowProcessInstance) event.getProcessInstance();
-        //RuleFlowProcess rfp = rfpi.getRuleFlowProcess();
 
-
-        if(rfpi.getVariable("com.gdit.rhba.correlationKey") != null) {
-            CorrelationKey correlationKeyVariable = (CorrelationKey) rfpi.getVariable("com.gdit.rhba.correlationKey");
-            correlationKey = correlationKeyVariable.getName();
-            LOGGER.debug("Got correlationkey: " + correlationKey);
-        } 
+        String id = Long.toString(rfpi.getId());
 
         ProcessTraceEvent processTraceEvent = new ProcessTraceEvent();
         processTraceEvent.setEventType(TraceEventType.ProcessTraceEvent);
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.BeforeProcessStarted);
-        processTraceEvent.setID(correlationKey);
+        processTraceEvent.setID(id);
         com.redhat.eventmodel.model.Process process = new Process();
         process.setName(event.getProcessInstance().getProcessName());
 
@@ -81,27 +71,14 @@ public class ProcessTraceEventListener implements ProcessEventListener {
     public void afterProcessCompleted(ProcessCompletedEvent event) {
         LOGGER.trace("AfterProcessCompleted: " + event.toString());
         if(event.getProcessInstance().getParentProcessInstanceId() == -1 ) {
-            Collection<AgendaEventListener> listenerList = event.getKieRuntime().getAgendaEventListeners();
-
             sendProcessCompletedEvent(event);
 
-            for (AgendaEventListener listener : listenerList) {
-                if (listener instanceof RuleTraceEventListener) {
-                    ((RuleTraceEventListener) listener).transformRulesNotFired();
-                    // Send rules-not-fired to queue
-
-                    // close the rule listener
-                    ((RuleTraceEventListener) listener).close();
-                    break;
-                }
-            }
             // close the publisher when everything is done
             try {
                 LOGGER.debug("Closing process listener publisher");
                 publisher.close();
             } catch (Exception e) {
                 LOGGER.warn("Failed to close publisher", e);
-//                e.printStackTrace();
             }
         }
     }
@@ -111,18 +88,14 @@ public class ProcessTraceEventListener implements ProcessEventListener {
     private void sendProcessCompletedEvent(ProcessCompletedEvent event) {
         RuleFlowProcessInstance rfpi = (RuleFlowProcessInstance) event.getProcessInstance();
 
-        if(rfpi.getVariable("com.gdit.rhba.correlationKey") != null) {
-            CorrelationKey correlationKeyVariable = (CorrelationKey) rfpi.getVariable("com.gdit.rhba.correlationKey");
-            correlationKey = correlationKeyVariable.getName();
-            LOGGER.debug("Got correlationkey: " + correlationKey);
-        }
+        String id = Long.toString(rfpi.getId());
 
         // Send process completed event
         ProcessTraceEvent processTraceEvent = new ProcessTraceEvent();
         processTraceEvent.setEventType(TraceEventType.ProcessTraceEvent);
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.AfterProcessCompleted);
-        processTraceEvent.setID(correlationKey);
+        processTraceEvent.setID(id);
         com.redhat.eventmodel.model.Process process = new Process();
         process.setName(event.getProcessInstance().getProcessName());
 
@@ -159,11 +132,13 @@ public class ProcessTraceEventListener implements ProcessEventListener {
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
         LOGGER.trace("AfterNodeTriggered: " + event.toString());
 
+        String id = Long.toString(event.getProcessInstance().getId());
+
         ProcessTraceEvent processTraceEvent = new ProcessTraceEvent();
         processTraceEvent.setEventType(TraceEventType.ProcessTraceEvent);
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.NodeTriggered);
-        processTraceEvent.setID(correlationKey);
+        processTraceEvent.setID(id);
 
         Node node = new Node();
         node.setType(NodeType.ProcessService);
