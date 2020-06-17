@@ -1,5 +1,8 @@
 package com.redhat.tracelisteners;
 
+import com.redhat.tracelisteners.messaging.AmqMessagePublisher;
+import com.redhat.tracelisteners.messaging.MessagePublisher;
+import com.redhat.tracelisteners.messaging.PublishingFailedException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,15 +33,20 @@ import org.kie.api.runtime.KieRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 public class RuleTraceEventListener implements AgendaEventListener {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(RuleTraceEventListener.class);
 	private List<String> rulesFired = new ArrayList<>( );
 	private String ruleFlowGroup = "";
-	private MessagePublisher publisher;
+	private MessagePublisher publisher = new AmqMessagePublisher();
 	private String correlationKey;
 	private KieRuntime runtime;
 
 	private HashMap<String, ArrayList<String>> rulesInPackage = new HashMap<>( );
+
+	public RuleTraceEventListener() throws Exception {
+	}
 
 	public String getCorrelationKey() {
 		return correlationKey;
@@ -62,8 +70,8 @@ public class RuleTraceEventListener implements AgendaEventListener {
 		try {
 			LOGGER.debug("Closing rule event listener publisher");
 			publisher.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			LOGGER.warn("Failed to close message", e);
 		}
 	}
 
@@ -113,10 +121,9 @@ public class RuleTraceEventListener implements AgendaEventListener {
 		ruleTraceEvent.setFacts(facts);
 
 		try {
-			publisher = new MessagePublisher(MessageQueueType.DRL);
-			publisher.publishMessage(/*routingkey*/1, ruleTraceEvent);
-		} catch (IOException | TimeoutException e) {
-			e.printStackTrace();
+			publisher.publishMessage(ruleTraceEvent);
+		} catch (PublishingFailedException e) {
+			LOGGER.warn("Failed to publish message");
 		}
 
 		rulesFired.add(event.getMatch().getRule().getName());
@@ -176,10 +183,9 @@ public class RuleTraceEventListener implements AgendaEventListener {
 		ruleTraceEvent.setID(correlationKey);
 
 		try {
-			publisher = new MessagePublisher(MessageQueueType.DRL);
-			publisher.publishMessage(/*routingkey*/1, ruleTraceEvent);
-		} catch (IOException | TimeoutException e) {
-			e.printStackTrace();
+			publisher.publishMessage(ruleTraceEvent);
+		} catch (PublishingFailedException e) {
+			LOGGER.warn("Failed to publish message", e);
 		}
 
 	}

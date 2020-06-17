@@ -17,6 +17,7 @@
         <rhba.platform.bom.version>7.7.0.redhat-00002</rhba.platform.bom.version>
         <slf4j.version>1.7.30</slf4j.version>
         <junit.version>4.13</junit.version>
+        <amqclient.version>2.10.0.redhat-00004</amqclient.version>
     </properties>
 
     <dependencyManagement>
@@ -32,6 +33,7 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -50,6 +52,7 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!--  -->
         <dependency>
             <groupId>com.redhat</groupId>
             <artifactId>event-model</artifactId>
@@ -80,6 +83,13 @@
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-dmn-api</artifactId>
+        </dependency>
+
+        <!-- AMQ -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client</artifactId>
+            <version>2.7.0.redhat-00056</version>
         </dependency>
 
         <!-- Logging -->

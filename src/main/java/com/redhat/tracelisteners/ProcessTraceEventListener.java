@@ -7,6 +7,9 @@ import com.redhat.eventmodel.events.TraceEventType;
 import com.redhat.eventmodel.model.Node;
 import com.redhat.eventmodel.model.NodeState;
 import com.redhat.eventmodel.model.NodeType;
+import com.redhat.tracelisteners.messaging.AmqMessagePublisher;
+import com.redhat.tracelisteners.messaging.MessagePublisher;
+import com.redhat.tracelisteners.messaging.PublishingFailedException;
 import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
 import org.kie.api.event.process.*;
 import org.kie.api.event.rule.AgendaEventListener;
@@ -22,9 +25,12 @@ import org.slf4j.LoggerFactory;
 
 public class ProcessTraceEventListener implements ProcessEventListener {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ProcessTraceEventListener.class);
-    private MessagePublisher publisher;
+    private MessagePublisher publisher = new AmqMessagePublisher();
     private String correlationKey;
     private LocalDateTime nodeStartTime;
+
+    public ProcessTraceEventListener() throws Exception {
+    }
 
     public String getCorrelationKey() {
         return correlationKey;
@@ -41,7 +47,8 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         //get correlation key name
         RuleFlowProcessInstance rfpi = (RuleFlowProcessInstance) event.getProcessInstance();
         //RuleFlowProcess rfp = rfpi.getRuleFlowProcess();
-        
+
+
         if(rfpi.getVariable("com.gdit.rhba.correlationKey") != null) {
             CorrelationKey correlationKeyVariable = (CorrelationKey) rfpi.getVariable("com.gdit.rhba.correlationKey");
             correlationKey = correlationKeyVariable.getName();
@@ -53,7 +60,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.BeforeProcessStarted);
         processTraceEvent.setID(correlationKey);
-        Process process = new Process();
+        com.redhat.eventmodel.model.Process process = new Process();
         process.setName(event.getProcessInstance().getProcessName());
 
         // if parent process instance id is -1, then it is the top most process
@@ -64,9 +71,9 @@ public class ProcessTraceEventListener implements ProcessEventListener {
 
         try {
             LOGGER.debug("BeforeProcessStarted sending to queue");
-            publisher = new MessagePublisher(MessageQueueType.PROCESS);
-            publisher.publishMessage(/*routingkey*/1, processTraceEvent);
-        } catch (IOException | TimeoutException e) {
+//            publisher = new MessagePublisher(MessageQueueType.PROCESS);
+            publisher.publishMessage(processTraceEvent);
+        } catch (PublishingFailedException e) {
             e.printStackTrace();
         }
     }
@@ -92,8 +99,9 @@ public class ProcessTraceEventListener implements ProcessEventListener {
             try {
                 LOGGER.debug("Closing process listener publisher");
                 publisher.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.warn("Failed to close publisher", e);
+//                e.printStackTrace();
             }
         }
     }
@@ -132,10 +140,10 @@ public class ProcessTraceEventListener implements ProcessEventListener {
 
         try {
             LOGGER.debug("BeforeProcessStarted sending to queue");
-            publisher = new MessagePublisher(MessageQueueType.PROCESS);
-            publisher.publishMessage(/*routingkey*/1, processTraceEvent);
-        } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
+            publisher.publishMessage(processTraceEvent);
+        } catch (PublishingFailedException e) {
+            LOGGER.warn("Failed to publish message", e);
+//            e.printStackTrace();
         }
 
     }
@@ -177,12 +185,13 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         
         processTraceEvent.setProcess(process);
 
+        //            publisher = new MessagePublisher(MessageQueueType.PROCESS);
         try {
-            publisher = new MessagePublisher(MessageQueueType.PROCESS);
-            publisher.publishMessage(/*routingkey*/1, processTraceEvent);
-          } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
-          }
+            publisher.publishMessage(processTraceEvent);
+        } catch (PublishingFailedException e) {
+            LOGGER.warn("Failed to publish message", e);
+//            e.printStackTrace();
+        }
     }
 
     public void afterProcessStarted(ProcessStartedEvent event) {
