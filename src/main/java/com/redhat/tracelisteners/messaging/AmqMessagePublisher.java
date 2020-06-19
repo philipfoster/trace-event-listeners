@@ -21,10 +21,9 @@ public class AmqMessagePublisher implements MessagePublisher {
     private static final String JNDI_PROCESS_EVENTS_QUEUE = "java:/queue/testQueue";
     private static final String JNDI_RULE_EVENTS_QUEUE = "rule-queue";
     private static final String JNDI_WORKING_MEMORY_QUEUE = "working-memory-queue";
-
-    private InitialContext context;
-    private ConnectionFactory connectionFactory;
     private final ObjectMapper mapper;
+    private final InitialContext context;
+    private final ConnectionFactory connectionFactory;
 
     public AmqMessagePublisher() throws Exception {
         // TODO: Find better way to  create the connection.
@@ -67,7 +66,7 @@ public class AmqMessagePublisher implements MessagePublisher {
         }
 
         try (Connection connection = connectionFactory.createConnection()) {
-            try (Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)){
+            try (Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)) {
                 Destination dest = (Destination) context.lookup(destName);
                 MessageProducer producer = session.createProducer(dest);
 
@@ -75,7 +74,7 @@ public class AmqMessagePublisher implements MessagePublisher {
 
                 TextMessage message = session.createTextMessage(eventStr);
                 producer.send(message);
-            } catch(Exception e){
+            } catch (Exception e) {
                 LOGGER.error("Failed to publish message to queue " + destName, e);
                 throw new PublishingFailedException(e);
             }

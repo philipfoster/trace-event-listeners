@@ -7,13 +7,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.redhat.tracelisteners.marshalling.LocalDateTimeDeserializer;
 import com.redhat.tracelisteners.marshalling.LocalDateTimeSerializer;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 
-@JsonPropertyOrder({"ID", "StartedOn", "CompletedOn", "State", "Type", "Name", "DecisionServices"})
+@JsonPropertyOrder({"ID", "StartedOn", "CompletedOn", "State", "Type", "Name"})
 public class Node {
-    
+
     private String ID;
 
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
@@ -26,10 +24,9 @@ public class Node {
 
     private NodeState state = NodeState.None;
     private NodeType type = NodeType.None;
-    private List<DecisionServiceTrace> decisionServices = new ArrayList<>( );
     private String name;
 
-	@JsonProperty("ID")
+    @JsonProperty("ID")
     public String getID() {
         return this.ID;
     }
@@ -38,7 +35,7 @@ public class Node {
         this.ID = ID;
     }
 
-	@JsonProperty("StartedOn")
+    @JsonProperty("StartedOn")
     public LocalDateTime getStartedOn() {
         return this.startedOn;
     }
@@ -47,7 +44,7 @@ public class Node {
         this.startedOn = startedOn;
     }
 
-	@JsonProperty("CompletedOn")
+    @JsonProperty("CompletedOn")
     public LocalDateTime getCompletedOn() {
         return this.completedOn;
     }
@@ -56,13 +53,9 @@ public class Node {
         this.completedOn = completedOn;
     }
 
-	@JsonProperty("State")
+    @JsonProperty("State")
     public void setState(NodeState state) {
         this.state = state;
-    }
-
-    public NodeState getState() {
-        return this.state;
     }
 
     @JsonProperty("Type")
@@ -70,30 +63,20 @@ public class Node {
         this.type = type;
     }
 
-    public NodeType getType() {
-        return this.type;
-    }
-
     @JsonProperty("Name")
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-	@JsonProperty("DecisionServices")
-    public List<DecisionServiceTrace>  getDecisionServices() {
-        return this.decisionServices;
-    }
-
-    public void setDecisionServices(List<DecisionServiceTrace> decisionServices) {
-        this.decisionServices = decisionServices;
-    }
-
     @Override
     public String toString() {
-        return "Node ID=" + getID() + ", startedOn=" + getStartedOn() + ", completedOn=" + getCompletedOn() + ", state=" + getState() + ", type=" + getType() + ", numberOfDecisionServices=" + getDecisionServices().size();
+        return "Node{" +
+            "ID='" + ID + '\'' +
+            ", startedOn=" + startedOn +
+            ", completedOn=" + completedOn +
+            ", state=" + state +
+            ", type=" + type +
+            ", name='" + name + '\'' +
+            '}';
     }
 }

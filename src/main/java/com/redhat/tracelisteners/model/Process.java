@@ -12,7 +12,7 @@ public class Process {
     private Map<String, Object> processVariables;
     private Node node;
 
-	@JsonProperty("Name")
+    @JsonProperty("Name")
     public String getName() {
         return this.name;
     }
@@ -21,7 +21,7 @@ public class Process {
         this.name = name;
     }
 
-	@JsonProperty("ParentProcessID")
+    @JsonProperty("ParentProcessID")
     public long getParentProcessID() {
         return this.parentProcessID;
     }
@@ -35,6 +35,10 @@ public class Process {
         return this.node;
     }
 
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
     @JsonProperty("ProcessVariables")
     public Map<String, Object> getProcessVariables() {
         return processVariables;
@@ -43,16 +47,6 @@ public class Process {
     public void setProcessVariables(Map<String, Object> processVariables) {
         this.processVariables = processVariables;
     }
-
-    public void setNode(Node node) {
-        this.node = node;
-    }
-
-//    @Override
-//    public String toString() {
-//        return "Process name=" + getName() + ", parentProcessID=" + getParentProcessID() + ", node=" + getNode();
-//    }
-
 
     @Override
     public String toString() {
