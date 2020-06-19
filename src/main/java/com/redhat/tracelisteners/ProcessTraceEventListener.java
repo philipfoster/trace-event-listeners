@@ -50,6 +50,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         processTraceEvent.setID(id);
         com.redhat.eventmodel.model.Process process = new Process();
         process.setName(event.getProcessInstance().getProcessName());
+        process.setProcessVariables(rfpi.getVariables());
 
         // if parent process instance id is -1, then it is the top most process
         if(event.getProcessInstance().getParentProcessInstanceId() != -1) {
@@ -73,7 +74,6 @@ public class ProcessTraceEventListener implements ProcessEventListener {
             // close the publisher when everything is done
             try {
                 LOGGER.debug("Closing process listener publisher");
-                publisher.close();
             } catch (Exception e) {
                 LOGGER.warn("Failed to close publisher", e);
             }
@@ -94,6 +94,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         processTraceEvent.setType(ProcessTraceEventType.AfterProcessCompleted);
         processTraceEvent.setID(id);
         com.redhat.eventmodel.model.Process process = new Process();
+        process.setProcessVariables(rfpi.getVariables());
         process.setName(event.getProcessInstance().getProcessName());
 
         // if parent process instance id is -1, then it is the top most process
@@ -129,6 +130,8 @@ public class ProcessTraceEventListener implements ProcessEventListener {
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
         LOGGER.trace("AfterNodeTriggered: " + event.toString());
 
+        RuleFlowProcessInstance rfpi = (RuleFlowProcessInstance) event.getProcessInstance();
+
         String id = Long.toString(event.getProcessInstance().getId());
 
         ProcessTraceEvent processTraceEvent = new ProcessTraceEvent();
@@ -151,6 +154,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         Process process = new Process();
         process.setNode(node);
         process.setName(event.getProcessInstance().getProcessName());
+        process.setProcessVariables(rfpi.getVariables());
         if(event.getProcessInstance().getParentProcessInstanceId() != -1) {
             process.setParentProcessID(event.getProcessInstance().getParentProcessInstanceId());
         }
