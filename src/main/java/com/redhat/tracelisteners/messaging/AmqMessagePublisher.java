@@ -2,9 +2,7 @@ package com.redhat.tracelisteners.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.eventmodel.events.ProcessTraceEvent;
-import com.redhat.eventmodel.events.RuleTraceEvent;
-import com.redhat.eventmodel.events.WorkingMemoryTraceEvent;
+import com.redhat.tracelisteners.events.ProcessTraceEvent;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -47,18 +45,18 @@ public class AmqMessagePublisher implements MessagePublisher {
         publishMessage(JNDI_PROCESS_EVENTS_QUEUE, event);
     }
 
-
-    @Override
-    public void publishMessage(RuleTraceEvent event) throws PublishingFailedException {
-        LOGGER.debug("Publishing rule trace event");
-        publishMessage(JNDI_RULE_EVENTS_QUEUE, event);
-    }
-
-    @Override
-    public void publishMessage(WorkingMemoryTraceEvent event) throws PublishingFailedException {
-        LOGGER.debug("Publishing working memory trace event");
-        publishMessage(JNDI_WORKING_MEMORY_QUEUE, event);
-    }
+//
+//    @Override
+//    public void publishMessage(RuleTraceEvent event) throws PublishingFailedException {
+//        LOGGER.debug("Publishing rule trace event");
+//        publishMessage(JNDI_RULE_EVENTS_QUEUE, event);
+//    }
+//
+//    @Override
+//    public void publishMessage(WorkingMemoryTraceEvent event) throws PublishingFailedException {
+//        LOGGER.debug("Publishing working memory trace event");
+//        publishMessage(JNDI_WORKING_MEMORY_QUEUE, event);
+//    }
 
     private void publishMessage(String destName, Object event) throws PublishingFailedException {
         try {

@@ -1,16 +1,16 @@
 package com.redhat.tracelisteners;
 
 
-import com.redhat.eventmodel.events.ProcessTraceEvent;
-import com.redhat.eventmodel.events.ProcessTraceEventType;
-import com.redhat.eventmodel.events.TraceEventType;
-import com.redhat.eventmodel.model.Node;
-import com.redhat.eventmodel.model.NodeState;
-import com.redhat.eventmodel.model.NodeType;
-import com.redhat.eventmodel.model.Process;
+import com.redhat.tracelisteners.events.ProcessTraceEvent;
+import com.redhat.tracelisteners.events.ProcessTraceEventType;
+import com.redhat.tracelisteners.events.TraceEventType;
 import com.redhat.tracelisteners.messaging.AmqMessagePublisher;
 import com.redhat.tracelisteners.messaging.MessagePublisher;
 import com.redhat.tracelisteners.messaging.PublishingFailedException;
+import com.redhat.tracelisteners.model.Node;
+import com.redhat.tracelisteners.model.NodeState;
+import com.redhat.tracelisteners.model.NodeType;
+import com.redhat.tracelisteners.model.Process;
 import java.time.LocalDateTime;
 import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
 import org.kie.api.event.process.ProcessCompletedEvent;
@@ -48,7 +48,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.BeforeProcessStarted);
         processTraceEvent.setID(id);
-        com.redhat.eventmodel.model.Process process = new Process();
+        com.redhat.tracelisteners.model.Process process = new Process();
         process.setName(event.getProcessInstance().getProcessName());
         process.setProcessVariables(rfpi.getVariables());
 
@@ -93,7 +93,7 @@ public class ProcessTraceEventListener implements ProcessEventListener {
         processTraceEvent.setTimeStamp(LocalDateTime.now());
         processTraceEvent.setType(ProcessTraceEventType.AfterProcessCompleted);
         processTraceEvent.setID(id);
-        com.redhat.eventmodel.model.Process process = new Process();
+        com.redhat.tracelisteners.model.Process process = new Process();
         process.setProcessVariables(rfpi.getVariables());
         process.setName(event.getProcessInstance().getProcessName());
 
