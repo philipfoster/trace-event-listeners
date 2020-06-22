@@ -85,8 +85,8 @@ The messages will follow this general format:
 { 
   "ProcessInstanceId":"18",
   "TimeStamp":"2020-06-19T15:42:34.131",
-  "EventType":"ProcessTraceEvent",
-  "Type":"BeforeNodeTriggered",
+  "TraceEventType":"ProcessTraceEvent",
+  "EventActionType":"BeforeNodeTriggered",
   "Process":{
     "Name":"testprocess",
     "Node":{
