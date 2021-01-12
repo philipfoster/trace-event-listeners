@@ -98,6 +98,11 @@
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jms-client</artifactId>
+            <version>2.16.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
             <version>5.11.0.redhat-630446</version>
         </dependency>
