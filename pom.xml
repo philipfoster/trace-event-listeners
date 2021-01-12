@@ -21,12 +21,6 @@
         <kie-maven-plugin.version>7.33.0.Final-redhat-00002</kie-maven-plugin.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>red-hat-ga</id>
-            <url>https://maven.repository.redhat.com/ga</url>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
