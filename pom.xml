@@ -111,11 +111,7 @@
             <artifactId>qpid-jms-client</artifactId>
             <version>0.45.0.redhat-00002</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-all</artifactId>
-            <version>5.16.0</version>
-        </dependency>
+
 
         <!-- Logging -->
         <dependency>
